@@ -1,0 +1,3 @@
+# .git ignore berfungsi untuk memberitahu File atau Folder apa yang harus di abaikan dalam sebuah proyek
+mode_modules/
+.env
