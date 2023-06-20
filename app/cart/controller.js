@@ -5,7 +5,6 @@ const store = async (req, res, next) => {
   try {
     const { items } = req.body;
     const productIds = items.map((item) => item.Product._id);
-    console.log("productsIds ===>", productIds);
     const products = await Product.find({ _id: { $in: productIds } });
     let cartItems = items.map((item) => {
       let relatedProduct = products.find(
@@ -37,20 +36,15 @@ const store = async (req, res, next) => {
 const update = async (req, res, next) => {
   try {
     const { items } = req.body;
-    console.log("items ===>", items);
 
     const productIds = items.map((item) => item._id);
-    console.log("productIds ===>", productIds);
 
     const products = await Product.find({ _id: { $in: productIds } });
-    console.log(" products ===> ", products);
 
     let cartItems = items.map((item) => {
-      console.log("item ===>", item);
       let relatedProduct = products.find(
         (product) => product._id.toString() === item._id
       );
-      console.log(" relatedProduct ===> ", relatedProduct);
       return {
         product: relatedProduct._id,
         price: relatedProduct.price,
@@ -60,12 +54,10 @@ const update = async (req, res, next) => {
         qty: 0,
       };
     });
-    console.log(" cartItems ===> ", cartItems);
 
     await CartItem.deleteMany({ user: req.user._id });
     await CartItem.bulkWrite(
       cartItems.map((item) => {
-        console.log("item ===>", item.product);
         return {
           updateOne: {
             filter: {
@@ -78,7 +70,6 @@ const update = async (req, res, next) => {
         };
       })
     );
-    console.log("cartitems tearkhir ===>", cartItems);
     return res.json(cartItems);
   } catch (err) {
     if (err && err.name === "validationError") {

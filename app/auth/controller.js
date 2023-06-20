@@ -49,6 +49,10 @@ const login = async (req, res, next) => {
 
     await User.findByIdAndUpdate(user._id, { $push: { token: signed } });
 
+    res.cookie("auth", signed, {
+      httpOnly: true,
+      maxAge: 24 * 60 * 60 * 1000,
+    });
     res.json({
       message: "login successfully",
       user,

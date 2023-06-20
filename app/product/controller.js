@@ -183,7 +183,6 @@ const index = async (req, res, next) => {
   try {
     let { skip = 0, limit = 100, q = "", category = "", tags = [] } = req.query;
     let criteria = {};
-    console.log("criteria ===>", criteria);
     if (q.length) {
       criteria = {
         ...criteria,
@@ -208,14 +207,12 @@ const index = async (req, res, next) => {
       }
     }
     let count = await Product.find().countDocuments();
-    console.log("criteria ===>", criteria);
 
     let product = await Product.find(criteria)
       .skip(parseInt(skip))
       .limit(parseInt(limit))
       .populate("category")
       .populate("tags");
-    console.log("product ===>", product);
     return res.json({
       data: product,
       count,

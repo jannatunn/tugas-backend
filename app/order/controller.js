@@ -8,12 +8,15 @@ const store = async (req, res, next) => {
   try {
     let { delivery_fee, delivery_address } = req.body;
     let items = await CartItem.find({ user: req.user._id }).populate("product");
+    console.log("Item ===>", items);
     if (!items) {
       return res.json({
         error: 1,
         message: `You're not create order because you have not items in cart`,
       });
     }
+    console.log("apakah ini akan dieksekui===>");
+
     let address = await DeliveryAddress.findById(delivery_address);
     let order = new Order({
       _id: new Types.ObjectId(),
@@ -44,6 +47,7 @@ const store = async (req, res, next) => {
     return res.json(order);
   } catch (err) {
     if (err && err.name == "ValidationError") {
+      console.log("ini adalah error", err);
       return res.json({
         error: 1,
         message: err.message,
