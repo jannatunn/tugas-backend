@@ -8,15 +8,9 @@ const productSchema = Schema(
       minlength: [3, "panjang nama makanan minimal 3 karakter"],
       required: [true, "nama makanan harus diisi"],
     },
-
-    description: {
-      type: String,
-      maxlength: [1000, "panjang deskripsi maksimal 1000 karakter"],
-    },
-
     price: {
       type: Number,
-      default: 0,
+      required: [true, "harga harus diisi"],
     },
 
     image_url: String,
@@ -25,15 +19,8 @@ const productSchema = Schema(
       type: Schema.Types.ObjectId,
       ref: "Category",
     },
-
-    tags: [
-      {
-        type: Schema.Types.ObjectId,
-        ref: "Tags",
-      },
-    ],
   },
   { timestamps: true }
 );
 
-module.exports = model("product", productSchema);
+module.exports = model("Product", productSchema);

@@ -1,6 +1,6 @@
 const CartItem = require("../cart-item/model");
 const DeliveryAddress = require("../deliveryAddress/model");
-const Order = require("../order/model");
+const Order = require("./model");
 const { Types } = require("mongoose");
 const Orderitem = require("../order-item/model");
 
@@ -8,14 +8,13 @@ const store = async (req, res, next) => {
   try {
     let { delivery_fee, delivery_address } = req.body;
     let items = await CartItem.find({ user: req.user._id }).populate("product");
-    console.log("Item ===>", items);
+    console.log("items ===>", items);
     if (!items) {
       return res.json({
         error: 1,
         message: `You're not create order because you have not items in cart`,
       });
     }
-    console.log("apakah ini akan dieksekui===>");
 
     let address = await DeliveryAddress.findById(delivery_address);
     let order = new Order({
@@ -31,30 +30,32 @@ const store = async (req, res, next) => {
       },
       user: req.user._id,
     });
+    console.log("order ===>", order);
     let orderItems = await Orderitem.insertMany(
       items.map((item) => ({
         ...item,
         name: item.product.name,
+        image: item.product.image_url,
         qty: parseInt(item.qty),
         price: parseInt(item.product.price),
         order: order._id,
         product: item.product._id,
       }))
     );
+    console.log("orderItems ===>", orderItems);
     orderItems.forEach((item) => order.order_items.push(item));
     order.save();
     await CartItem.deleteMany({ user: req.user._id });
     return res.json(order);
   } catch (err) {
     if (err && err.name == "ValidationError") {
-      console.log("ini adalah error", err);
       return res.json({
         error: 1,
         message: err.message,
         fields: err.errors,
       });
     }
-
+    console.log("ini testing");
     next(err);
   }
 };

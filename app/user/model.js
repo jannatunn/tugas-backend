@@ -21,6 +21,8 @@ let userSchema = Schema(
       required: [true, "email harus diisi"],
       maxlength: [255, "panjang email maximal 255 karakter"],
     },
+    
+    image: String,
 
     password: {
       type: String,

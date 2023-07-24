@@ -11,6 +11,7 @@ const orderItemSchema = Schema({
     type: Number,
     required: [true, "harga makanan harus diisi"],
   },
+  image: String,
   qty: {
     type: Number,
     required: [true, "kuantitas harus diisi"],
@@ -18,7 +19,7 @@ const orderItemSchema = Schema({
   },
   product: {
     type: Schema.Types.ObjectId,
-    ref: "Product",
+    ref: "product",
   },
   order: {
     type: Schema.Types.ObjectId,

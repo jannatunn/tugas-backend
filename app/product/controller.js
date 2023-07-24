@@ -3,13 +3,10 @@ const fs = require("fs");
 const config = require("../config");
 const Product = require("./model");
 const Category = require("../category/model");
-const Tag = require("../tags/model");
 
 const store = async (req, res, next) => {
   try {
     let payload = req.body;
-
-    // update karena realsi dengan kategory
     if (payload.category) {
       let category = await Category.findOne({
         name: { $regex: payload.category, $options: "i" },
@@ -21,17 +18,6 @@ const store = async (req, res, next) => {
       }
     }
 
-    // update karena relasi dengan tags
-    if (payload.tags && payload.tags.length > 0) {
-      let tags = await Tag.find({
-        name: { $in: payload.tags },
-      });
-      if (tags.length) {
-        payload = { ...payload, tags: tags.map((tag) => tag._id) };
-      } else {
-        delete payload.tags;
-      }
-    }
     if (req.file) {
       let tmp_path = req.file.path;
       let originalExt =
@@ -72,6 +58,7 @@ const store = async (req, res, next) => {
       });
     } else {
       let product = new Product(payload);
+      console.log("product ===> ", product);
       await product.save();
       return res.json(product);
     }
@@ -92,7 +79,6 @@ const update = async (req, res, next) => {
     let payload = req.body;
     let { id } = req.params;
 
-    // update karena realsi dengan kategory
     if (payload.category) {
       let category = await Category.findOne({
         name: { $regex: payload.category, $options: "i" },
@@ -101,16 +87,6 @@ const update = async (req, res, next) => {
         payload = { ...payload, category: category._id };
       } else {
         delete payload.category;
-      }
-    }
-    if (payload.tags && payload.tags.length > 0) {
-      let tags = await Tag.find({
-        name: { $in: payload.tags },
-      });
-      if (tags.length) {
-        payload = { ...payload, tags: tags.map((tag) => tag._id) };
-      } else {
-        delete payload.tags;
       }
     }
     if (req.file) {
@@ -181,7 +157,7 @@ const update = async (req, res, next) => {
 
 const index = async (req, res, next) => {
   try {
-    let { skip = 0, limit = 100, q = "", category = "", tags = [] } = req.query;
+    let { category = "", q = "" } = req.query;
     let criteria = {};
     if (q.length) {
       criteria = {
@@ -197,22 +173,13 @@ const index = async (req, res, next) => {
         criteria = { ...criteria, category: categoryResulth._id };
       }
     }
-    if (tags.length) {
-      let tagsResulth = await Tag.find({ name: { $in: tags } });
-      if (tagsResulth.length > 0) {
-        criteria = {
-          ...criteria,
-          tags: { $in: tagsResulth.map((tag) => tag._id) },
-        };
-      }
-    }
+
     let count = await Product.find().countDocuments();
 
     let product = await Product.find(criteria)
-      .skip(parseInt(skip))
-      .limit(parseInt(limit))
-      .populate("category")
-      .populate("tags");
+      .sort({ updatedAt: -1 })
+      .populate("category");
+
     return res.json({
       data: product,
       count,
@@ -229,6 +196,8 @@ const destroy = async (req, res, next) => {
     if (fs.existsSync(currentImage)) {
       fs.unlinkSync(currentImage);
     }
+    console.log(product);
+    console.log(currentImage);
     return res.json(product);
   } catch (err) {
     next(err);

@@ -10,11 +10,11 @@ const cartItemSchema = Schema({
   qty: {
     type: String,
     required: [true, "qty harus diisi"],
-    // min: [1, "minimanl quanutity adalah 1"],
-    default: 0,
+    min: [1, "minimanl quantity adalah 1"],
   },
   price: {
     type: Number,
+    default: 0,
   },
   image_url: String,
   user: {

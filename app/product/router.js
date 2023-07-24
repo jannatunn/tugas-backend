@@ -7,9 +7,8 @@ const productController = require("./controller");
 
 router.get("/products", productController.index);
 router.post(
-  "/products",
+  "/product",
   multer({ dest: os.tmpdir() }).single("image"),
-  police_check("create", "product"),
   productController.store
 );
 router.put(
@@ -24,4 +23,4 @@ router.delete(
   productController.destroy
 );
 
-module.exports = router;
+module.exports = router;  
