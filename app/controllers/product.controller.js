@@ -1,21 +1,56 @@
+const Product = require("../models/product.model");
+const Category = require("../models/category.model");
 const path = require("path");
 const fs = require("fs");
 const config = require("../config");
-const Product = require("./model");
-const Category = require("../category/model");
 
-const store = async (req, res, next) => {
+const getProduct = async (req, res, next) => {
+  try {
+    let { category = "", q = "" } = req.query;
+    let criteria = {};
+
+    if (q.length) {
+      criteria = {
+        ...criteria,
+        name: { $regex: `${q}`, $options: "i" },
+      };
+    }
+    if (category.length) {
+      let categoryResulth = await Category.findOne({
+        name: { $regex: `${category}`, $options: "i" },
+      });
+      if (categoryResulth) {
+        criteria = { ...criteria, category: categoryResulth._id };
+      }
+    }
+
+    let count = await Product.find().countDocuments();
+
+    let product = await Product.find(criteria)
+      .sort({ updatedAt: -1 })
+      .populate("category");
+
+    return res.json({
+      data: product,
+      count,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+const addProduct = async (req, res, next) => {
   try {
     let payload = req.body;
+
     if (payload.category) {
       let category = await Category.findOne({
         name: { $regex: payload.category, $options: "i" },
       });
+
       if (category) {
         payload = { ...payload, category: category._id };
-      } else {
-        delete payload.category;
-      }
+      } else delete payload.category;
     }
 
     if (req.file) {
@@ -58,27 +93,27 @@ const store = async (req, res, next) => {
       });
     } else {
       let product = new Product(payload);
-      console.log("product ===> ", product);
       await product.save();
       return res.json(product);
     }
-  } catch (err) {
-    if (err && err.name === "ValidationError") {
+  } catch (error) {
+    if (error && error.name === "ValidationError") {
       return res.json({
         error: 1,
-        message: err.message,
-        fields: err.errors,
+        message: error.message,
+        fields: error.errors,
       });
     }
-    next(err);
+    next(error);
   }
 };
 
-const update = async (req, res, next) => {
+const updateProduct = async (req, res, next) => {
   try {
     let payload = req.body;
     let { id } = req.params;
 
+    // update karena realsi dengan kategory
     if (payload.category) {
       let category = await Category.findOne({
         name: { $regex: payload.category, $options: "i" },
@@ -98,7 +133,7 @@ const update = async (req, res, next) => {
       let filename = req.file.filename + "." + originalExt;
       let target_path = path.resolve(
         config.rootPath,
-        `public/images/products/${filename}`
+        `public/images/contoh/${filename}`
       );
 
       const src = fs.createReadStream(tmp_path);
@@ -143,70 +178,31 @@ const update = async (req, res, next) => {
       });
       return res.json(product);
     }
-  } catch (err) {
-    if (err && err.name === "ValidationError") {
+  } catch (error) {
+    if (error && error.name === "ValidationError") {
       return res.json({
         error: 1,
-        message: err.message,
-        fields: err.errors,
+        message: error.message,
+        fields: error.errors,
       });
     }
-    next(err);
+    next(error);
   }
 };
 
-const index = async (req, res, next) => {
-  try {
-    let { category = "", q = "" } = req.query;
-    let criteria = {};
-    if (q.length) {
-      criteria = {
-        ...criteria,
-        name: { $regex: `${q}`, $options: "i" },
-      };
-    }
-    if (category.length) {
-      let categoryResulth = await Category.findOne({
-        name: { $regex: `${category}`, $options: "i" },
-      });
-      if (categoryResulth) {
-        criteria = { ...criteria, category: categoryResulth._id };
-      }
-    }
-
-    let count = await Product.find().countDocuments();
-
-    let product = await Product.find(criteria)
-      .sort({ updatedAt: -1 })
-      .populate("category");
-
-    return res.json({
-      data: product,
-      count,
-    });
-  } catch (err) {
-    next(err);
-  }
-};
-
-const destroy = async (req, res, next) => {
+const deleteProduct = async (req, res, next) => {
   try {
     let product = await Product.findByIdAndDelete(req.params.id);
     let currentImage = `${config.rootPath}/public/images/products/${product.image_url}`;
+
     if (fs.existsSync(currentImage)) {
       fs.unlinkSync(currentImage);
     }
-    console.log(product);
-    console.log(currentImage);
+
     return res.json(product);
-  } catch (err) {
-    next(err);
+  } catch (error) {
+    next(error);
   }
 };
 
-module.exports = {
-  store,
-  index,
-  update,
-  destroy,
-};
+module.exports = { addProduct, getProduct, deleteProduct, updateProduct };

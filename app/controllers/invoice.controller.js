@@ -1,5 +1,5 @@
 const { subject } = require("@casl/ability");
-const Invoice = require("../invoice/model");
+const Invoice = require("../models/invoice.model");
 const { policyFor } = require("../../utils");
 
 const show = async (req, res, next) => {

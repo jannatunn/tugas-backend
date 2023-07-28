@@ -1,39 +1,7 @@
-const Product = require("../product/model");
-const CartItem = require("../cart-item/model");
+const Product = require("../models/product.model");
+const CartItem = require("../models/cart-item.model");
 
-const store = async (req, res, next) => {
-  try {
-    const { items } = req.body;
-    const productIds = items.map((item) => item.Product._id);
-    const products = await Product.find({ _id: { $in: productIds } });
-    let cartItems = items.map((item) => {
-      let relatedProduct = products.find(
-        (product) => product._id.toString === item.product._id
-      );
-      return {
-        product: relatedProduct._id,
-        price: relatedProduct.price,
-        image_url: relatedProduct.image_url,
-        name: relatedProduct.name,
-        user: req.user._id,
-        qty: item.qty,
-      };
-    });
-
-    return res.json(cartItems);
-  } catch (err) {
-    if (err && err.name === "validationError") {
-      return res.json({
-        error: 1,
-        message: err.message,
-        fields: err.errors,
-      });
-    }
-    next(err);
-  }
-};
-
-const update = async (req, res, next) => {
+const updateCartItems = async (req, res, next) => {
   try {
     const { items } = req.body;
 
@@ -71,7 +39,7 @@ const update = async (req, res, next) => {
       })
     );
     return res.json(cartItems);
-  } catch (err) {
+  } catch (error) {
     if (err && err.name === "validationError") {
       return res.json({
         error: 1,
@@ -83,20 +51,20 @@ const update = async (req, res, next) => {
   }
 };
 
-const index = async (req, res, next) => {
+const getCartItems = async (req, res, next) => {
   try {
     let items = await CartItem.find({ user: req.user._id }).populate("product");
     return res.json(items);
-  } catch (err) {
-    if (err && err.name === "validationError") {
+  } catch (error) {
+    if (error && error.name === "ValidationError") {
       return res.json({
         error: 1,
-        message: err.message,
-        fields: err.errors,
+        message: error.message,
+        fields: error.errors,
       });
     }
-    next(err);
+    next(error);
   }
 };
 
-module.exports = { update, index, store };
+module.exports = { getCartItems, updateCartItems };

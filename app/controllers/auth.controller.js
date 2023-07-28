@@ -1,4 +1,4 @@
-const User = require("../user/model");
+const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
@@ -83,12 +83,12 @@ const logout = async (req, res, next) => {
 };
 
 const me = (req, res, next) => {
-  // if (!req.user) {
-  //   res.json({
-  //     err: 1,
-  //     message: `You're not login or token expired`,
-  //   });
-  // }
+  if (!req.user) {
+    res.json({
+      err: 1,
+      message: `You're not login or token expired`,
+    });
+  }
   res.json(req.user);
 };
 module.exports = {

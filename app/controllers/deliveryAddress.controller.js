@@ -1,6 +1,6 @@
 const { subject } = require("@casl/ability");
 const { policyFor } = require("../../utils");
-const DeliveryAddress = require("./model");
+const DeliveryAddress = require("../models/deliveryAddress.model");
 
 const store = async (req, res, next) => {
   try {
@@ -44,13 +44,11 @@ const destroy = async (req, res, next) => {
   try {
     let { id } = req.params;
     let address = await DeliveryAddress.findById(id);
-    console.log("id ==>", id);
     let subjectaddres = subject("DeliveryAddress", {
       ...address,
       user_id: address.id,
     });
     let policy = policyFor(req.user);
-    console.log("policy ==>", policy);
     if (!policy.can("delete", subjectaddres)) {
       return res.json({
         error: 1,
