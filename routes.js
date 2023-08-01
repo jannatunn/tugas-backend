@@ -85,6 +85,11 @@ router.get(
 
 // ===> order <===
 router.get("/orders", police_check("view", "Order"), orderController.getOrder);
+router.post(
+  "/orders",
+  police_check("create", "Order"),
+  orderController.addOrder
+);
 
 // ===> invoice <===
 router.get("/invoices/:order_id", invoiceController.show);

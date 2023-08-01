@@ -5,7 +5,7 @@ const { policyFor } = require("../../utils");
 const show = async (req, res, next) => {
   try {
     let { order_id } = req.params;
-    console.log(order_id);
+
     let invoice = await Invoice.findOne({ order: order_id })
       .populate("order")
       .populate("user");
@@ -15,6 +15,7 @@ const show = async (req, res, next) => {
       ...invoice,
       user_id: invoice.user._id,
     });
+
     if (!policy.can("read", subjectInvoice)) {
       return res.json({
         error: 1,

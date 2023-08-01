@@ -1,25 +1,28 @@
-const User = require("../models/user.model");
 const bcrypt = require("bcrypt");
+const User = require("../models/user.model");
+const Product = require("../models/product.model");
 const passport = require("passport");
 const jwt = require("jsonwebtoken");
 const config = require("../config");
 const { getToken } = require("../../utils");
 
 const register = async (req, res, next) => {
+  // const user = new User(req.body);
   try {
     const payload = req.body;
     let user = new User(payload);
     await user.save();
+
     return res.json(user);
-  } catch (err) {
-    if (err && err.name === "ValidationError") {
+  } catch (error) {
+    if (error && error.name === "ValidationError") {
       return res.json({
-        err: 1,
-        message: err.massage,
-        fields: err.errors,
+        error: 1,
+        message: error.message,
+        fields: error.errors,
       });
     }
-    next(err);
+    next(error);
   }
 };
 

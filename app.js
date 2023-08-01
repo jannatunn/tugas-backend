@@ -21,7 +21,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, "/public")));
 app.use(decodeToken());
 
-app.use("/api", routes);
+app.use("/", routes);
 // home
 app.use("/", function (req, res) {
   res.render("index", {

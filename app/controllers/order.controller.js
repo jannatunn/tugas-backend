@@ -4,7 +4,7 @@ const Order = require("../models/order.model");
 const { Types } = require("mongoose");
 const Orderitem = require("../models/order-items.model");
 
-const store = async (req, res, next) => {
+const addOrder = async (req, res, next) => {
   try {
     let { delivery_fee, delivery_address } = req.body;
     let items = await CartItem.find({ user: req.user._id }).populate("product");
@@ -16,6 +16,7 @@ const store = async (req, res, next) => {
     }
 
     let address = await DeliveryAddress.findById(delivery_address);
+
     let order = new Order({
       _id: new Types.ObjectId(),
       status: "waiting_payment",
@@ -41,6 +42,7 @@ const store = async (req, res, next) => {
       }))
     );
     orderItems.forEach((item) => order.order_items.push(item));
+
     order.save();
     await CartItem.deleteMany({ user: req.user._id });
     return res.json(order);
@@ -83,6 +85,6 @@ const getOrder = async (req, res, next) => {
 };
 
 module.exports = {
-  store,
+  addOrder,
   getOrder,
 };

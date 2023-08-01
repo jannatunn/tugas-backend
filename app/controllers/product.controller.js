@@ -42,7 +42,6 @@ const getProduct = async (req, res, next) => {
 const addProduct = async (req, res, next) => {
   try {
     let payload = req.body;
-
     if (payload.category) {
       let category = await Category.findOne({
         name: { $regex: payload.category, $options: "i" },
