@@ -136,9 +136,12 @@ const updatedCategory = async (req, res, next) => {
 
 const deleteCategory = async (req, res, next) => {
   try {
+    console.log("req.params", req.params);
+
     const category = await Categories.findByIdAndDelete(req.params.id);
+    console.log("category", category);
     return res.json(category);
-  } catch (error) {
+  } catch (err) {
     if (err & (err.name === "ValidationError")) {
       return res.json({
         error: 1,

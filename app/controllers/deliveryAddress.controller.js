@@ -2,7 +2,7 @@ const { subject } = require("@casl/ability");
 const { policyFor } = require("../../utils");
 const DeliveryAddress = require("../models/deliveryAddress.model");
 
-const store = async (req, res, next) => {
+const addAddress = async (req, res, next) => {
   try {
     let payload = req.body;
     let user = req.user;
@@ -21,13 +21,27 @@ const store = async (req, res, next) => {
   }
 };
 
-const update = async (req, res, next) => {
+const updateAddress = async (req, res, next) => {
   try {
+    let payload = req.body;
     let { id } = req.params;
-
-    await DeliveryAddress.findByIdAndUpdate(id, req.body, { new: true });
-
-    res.json("succes");
+    let address = await DeliveryAddress.findById(id);
+    let subjectaddres = subject("DeliveryAddress", {
+      ...address,
+      user_id: address.user,
+    });
+    let policy = policyFor(req.user);
+    if (!policy.can("update", subjectaddres)) {
+      return res.json({
+        error: 1,
+        message: `You're not allowed to modify this resource`,
+      });
+    }
+    address = await DeliveryAddress.findByIdAndUpdate(id, payload, {
+      new: true,
+    });
+    console.log("address", address);
+    res.json(address);
   } catch (err) {
     if (err && err.name === "ValidationError") {
       return res.json({
@@ -40,13 +54,13 @@ const update = async (req, res, next) => {
   }
 };
 
-const destroy = async (req, res, next) => {
+const deleteAddress = async (req, res, next) => {
   try {
     let { id } = req.params;
     let address = await DeliveryAddress.findById(id);
     let subjectaddres = subject("DeliveryAddress", {
       ...address,
-      user_id: address.id,
+      user_id: address.user,
     });
     let policy = policyFor(req.user);
     if (!policy.can("delete", subjectaddres)) {
@@ -69,7 +83,7 @@ const destroy = async (req, res, next) => {
   }
 };
 
-const index = async (req, res, next) => {
+const getAddress = async (req, res, next) => {
   try {
     let { skip = 0, limit = 10 } = req.query;
     let count = await DeliveryAddress.find({
@@ -94,8 +108,8 @@ const index = async (req, res, next) => {
 };
 
 module.exports = {
-  store,
-  destroy,
-  update,
-  index,
+  addAddress,
+  deleteAddress,
+  updateAddress,
+  getAddress,
 };

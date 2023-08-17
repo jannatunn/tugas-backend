@@ -73,14 +73,14 @@ router.put(
 router.post(
   "/delivery-addresses",
   police_check("create", "DeliveryAddress"),
-  deliveryAddressController.store
+  deliveryAddressController.addAddress
 );
-router.put("/delivery-address/:id", deliveryAddressController.update);
-router.delete("/delivery-address/:id", deliveryAddressController.destroy);
+router.put("/delivery-address/:id", deliveryAddressController.updateAddress);
+router.delete("/delivery-address/:id", deliveryAddressController.deleteAddress);
 router.get(
   "/delivery-address",
   police_check("view", "DeliveryAddress"),
-  deliveryAddressController.index
+  deliveryAddressController.getAddress
 );
 
 // ===> order <===

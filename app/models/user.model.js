@@ -5,7 +5,7 @@ const bcrypt = require("bcrypt");
 // Definisi Schema userSchema
 const userSchema = Schema(
   {
-    full_name: {
+    name: {
       type: String,
       required: [true, "nama harus diisi"],
       maxlength: [255, "panjang nama harus antara 3 - 255 karakter"],
